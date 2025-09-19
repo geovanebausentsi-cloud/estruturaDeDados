@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumo de api - uso de funções assincronas</title>
+</head>
+
+<body>
+    <h2>consumo de api</h2>
+
+    <input type="text" id="textoImput" title="Digite o nome do drink para buscar"
+        placeholder="digite o que deseja consultar">
+
+    <button onclick="executarBusca()">Buscar</button>
+    <div id="resultado"></div>
+
+    <script>
+        //vetor para armazenar os dados
+        let dadosLocais = [];
+
+        //função para recuperar os dados da api - Assincrona
+        async function buscarNaApi(textoDoInput) {
+            const resposta = await fetch(`https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${textoDoInput}`);
+
+            const dadosDaApi = await resposta.json();
+            dadosLocais = dadosDaApi.drinks || [];
+        }
+
+        async function executarBusca() {
+            let textoDoInput = document.getElementById('textoImput').value;
+            await buscarNaApi(textoDoInput);
+
+            let resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = ""; // Limpa resultados anteriores
+
+            for (let i = 0; i < dadosLocais.length; i++) {
+                resultadoDiv.innerHTML += `<p>${dadosLocais[i].strDrink}</p>`;
+            }
+        }
+
+        //async - declara a função como assíncrona.
+        //await -espera a resposta de uma promessa.
+        //fetch -faz a requisição à API.
+    </script>
+</body>
+
+</html>
