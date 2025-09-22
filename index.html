@@ -8,41 +8,79 @@
 </head>
 
 <body>
-    <h2>consumo de api</h2>
-
-    <input type="text" id="textoImput" title="Digite o nome do drink para buscar"
-        placeholder="digite o que deseja consultar">
-
-    <button onclick="executarBusca()">Buscar</button>
+    <h2>Todos os drinks</h2>
     <div id="resultado"></div>
 
     <script>
-        //vetor para armazenar os dados
         let dadosLocais = [];
 
-        //função para recuperar os dados da api - Assincrona
-        async function buscarNaApi(textoDoInput) {
-            const resposta = await fetch(`https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${textoDoInput}`);
+        async function buscarTodosDrinks() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = "<p>Carregando drinks...</p>";
 
-            const dadosDaApi = await resposta.json();
-            dadosLocais = dadosDaApi.drinks || [];
-        }
+            const letras = 'abcdefghijklmnopqrstuvwxyz'.split('');
+            let todosDrinks = [];
 
-        async function executarBusca() {
-            let textoDoInput = document.getElementById('textoImput').value;
-            await buscarNaApi(textoDoInput);
-
-            let resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = ""; // Limpa resultados anteriores
-
-            for (let i = 0; i < dadosLocais.length; i++) {
-                resultadoDiv.innerHTML += `<p>${dadosLocais[i].strDrink}</p>`;
+            for (const letra of letras) {
+                try {
+                    const resposta = await fetch(`https://www.thecocktaildb.com/api/json/v1/1/search.php?f=${letra}`);
+                    const dadosDaApi = await resposta.json();
+                    if (Array.isArray(dadosDaApi.drinks)) {
+                        todosDrinks = todosDrinks.concat(dadosDaApi.drinks);
+                    }
+                } catch (e) {
+                    // Ignora erros de rede para cada letra
+                }
             }
+
+            dadosLocais = todosDrinks.map(drink => {
+                let ingredientes = [];
+                for (let i = 1; i <= 15; i++) {
+                    const ingrediente = drink[`strIngredient${i}`];
+                    const medida = drink[`strMeasure${i}`];
+                    if (ingrediente) {
+                        ingredientes.push({
+                            nome: ingrediente,
+                            medida: medida || ''
+                        });
+                    }
+                }
+                return {
+                    nome: drink.strDrink,
+                    categoria: drink.strCategory,
+                    copo: drink.strGlass,
+                    instrucoes: drink.strInstructions,
+                    imagem: drink.strDrinkThumb,
+                    ingredientes: ingredientes
+                };
+            });
+            exibirDrinks();
         }
 
-        //async - declara a função como assíncrona.
-        //await -espera a resposta de uma promessa.
-        //fetch -faz a requisição à API.
+        function exibirDrinks() {
+            let resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = "";
+            dadosLocais.forEach(drink => {
+                let ingredientesHtml = '<ul>';
+                drink.ingredientes.forEach(ing => {
+                    ingredientesHtml += `<li>${ing.nome}${ing.medida ? ' - ' + ing.medida : ''}</li>`;
+                });
+                ingredientesHtml += '</ul>';
+
+                resultadoDiv.innerHTML += `
+                    <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+                        <h3>${drink.nome}</h3>
+                        <img src="${drink.imagem}" alt="${drink.nome}" width="150">
+                        <p><strong>Categoria:</strong> ${drink.categoria}</p>
+                        <p><strong>Tipo de copo:</strong> ${drink.copo}</p>
+                        <p><strong>Instruções:</strong> ${drink.instrucoes}</p>
+                        <strong>Ingredientes:</strong> ${ingredientesHtml}
+                    </div>
+                `;
+            });
+        }
+
+        buscarTodosDrinks();
     </script>
 </body>
 
