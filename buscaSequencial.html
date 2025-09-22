@@ -1,0 +1,57 @@
+</head>
+
+<body>
+    <h2>Buscar sequencial- Rick and Morty</h2>
+    <input type="text" id="nomeInput" placeholder="Digite o nome que deseja consultar aqui: ">
+    <button onclick="executarBusca()">Buscar</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        let personagens = [];
+
+        //Função que recupera os dados da API - Assíncrona
+        async function buscarPersonagens() {
+            const resposta = await fetch('https://rickandmortyapi.com/api/character');
+            const dados = await resposta.json();
+            personagens = dados.results;
+        }
+
+        //comparação com busca sequencial       /// find()//função sequencial do js
+        function buscaSequencial(vetor, nome) {
+            for (let i = 0; i < vetor.length; i++) {
+                if (vetor[i].name.toLowerCase() === nome.toLowerCase()) {
+                    return vetor[i];
+                }
+            }
+            return null;
+        }
+
+        async function executarBusca() {
+            const nome = document.getElementById('nomeInput').value.trim();
+            const divResultado = document.getElementById('resultado');
+            if (!personagens.length) {
+                await buscarPersonagens();
+            }
+            console.time('busca sequencial')
+            const resultadoSeq = buscaSequencial(personagens, nome);
+            console.timeEnd('busca sequencial');
+
+
+            //MOSTRAR RESULTADOS
+            if (resultadoSeq) {
+                divResultado.innerHTML = `
+             <p><strong>Resultado: </strong></p>
+             <p><strong>Nome: </strong>${resultadoSeq.name}</p>
+             <p><strong>Status: </strong>${resultadoSeq.status}</p>
+             <img src="${resultadoSeq.image}" alt="${resultadoSeq.name}" width="200"/>
+            `;
+            } else {
+                divResultado.innerHTML = `<p>Resultado não encontrado</p>`;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

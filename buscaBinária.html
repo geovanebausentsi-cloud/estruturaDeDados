@@ -1,0 +1,70 @@
+</head>
+
+<body>
+    <h2>Buscar Binaria - Rick and Morty</h2>
+    <input type="text" id="nomeInput" placeholder="Digite o nome que deseja consultar aqui: ">
+    <button onclick="executarBusca()">Buscar</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        let personagens = [];
+
+        //Função que recupera os dados da API - Assíncrona
+        async function buscarPersonagens() {
+            const resposta = await fetch('https://rickandmortyapi.com/api/character');
+            const dados = await resposta.json();
+            personagens = dados.results;
+        }
+
+        //função de busca binária
+        function buscaBinaria(vetor, nome) {
+            let inicio = 0;
+            let fim = vetor.length - 1;
+
+            while (inicio <= fim) {
+                let meio = Math.floor((inicio + fim) / 2);
+                const atual = vetor[meio].name.toLowerCase();
+
+                if (atual === nome.toLowerCase()) {
+                    return vetor[meio];
+                } else if (atual < nome.toLowerCase()) {
+                    inicio = meio + 1;
+                } else {
+                    fim = meio - 1;
+                }
+            }
+            return null;
+        }
+
+        async function executarBusca() {
+            const nome = document.getElementById('nomeInput').value.trim();
+            const divResultado = document.getElementById('resultado');
+
+            if (!personagens.length) {
+                await buscarPersonagens();
+            }
+
+            // Movemos a ordenação e a busca binária para dentro da função
+            const ordenados = [...personagens].sort((a, b) => a.name.localeCompare(b.name));
+
+            console.time('busca binária');
+            const resultado = buscaBinaria(ordenados, nome);
+            console.timeEnd('busca binária');
+
+            //MOSTRAR RESULTADOS    
+            if (resultado) {
+                divResultado.innerHTML = `
+                    <p><strong>Resultado: </strong></p>
+                    <p><strong>Nome: </strong>${resultado.name}</p>
+                    <p><strong>Status: </strong>${resultado.status}</p>
+                    <img src="${resultado.image}" alt="${resultado.name}" width="200"/>
+                `;
+            } else {
+                divResultado.innerHTML = `<p>Resultado não encontrado</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
