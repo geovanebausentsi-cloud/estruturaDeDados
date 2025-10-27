@@ -1,0 +1,22 @@
+//Algoritmo de ordenação que funciona como se fosse bolhas em um copo da agua.
+function boobleSort(vetor){
+    i=0, j=0, aux=0;
+
+    for(let i = 0; i < vetor.length- 1; i++){
+        for( j = 0; j < (vetor.length - i - 1); j++){
+            if(vetor[j] > vetor[j + 1]){
+                aux = vetor[j];
+                vetor[j] = vetor[j + 1];
+                vetor[j + 1] = aux;
+            }
+        }
+    }
+}
+
+// --- Execução do Código ---
+
+// 1. Define o vetor que será ordenado.
+const vetor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+boobleSort(vetor);
+console.log(vetor);
+// Saída) node bublleSort.js
